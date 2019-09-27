@@ -136,16 +136,17 @@ def check_flags(x, y, required_flags):
     return False
 
 
-
 def check_hit_mine(x, y):
     hit_mine = False
     cell_value = field[x][y]
     if cell_value != "M" and display_field[x][y] != "F":
         if cell_value != "0":
-            if check_flags(x, y, int(cell_value)):
+            if display_field[x][y] == "H":
+                reveal_cell(x, y)
+            elif check_flags(x, y, int(cell_value)):
                 for i in range(3):
                     for j in range(3):
-                        if 0 <= x + i - 1 < rows and 0 <= y + j - 1 < columns and field[x + i - 1][y + j - 1] != "M": # and display_field[x + i - 1][y + j - 1] != "F":
+                        if 0 <= x + i - 1 < rows and 0 <= y + j - 1 < columns and field[x + i - 1][y + j - 1] != "M": 
                             if display_field[x + i - 1][y + j - 1] == "F":
                                 return True
                             else:
@@ -166,8 +167,13 @@ def check_hit_mine(x, y):
 def reveal_mines():
     for r in range(rows):
         for c in range(columns):
-            if field[r][c] == "M" and display_field[r][c] != "F":
-                pygame.draw.rect(game_screen, RED, (c * SQUARESIZE + BORDER + WIDTH, r * SQUARESIZE + BORDER + WIDTH, -2 * WIDTH + SQUARESIZE, -2 * WIDTH + SQUARESIZE))
+            if field[r][c] == "M" or display_field[r][c] == "F":
+                if display_field[r][c] == "F":
+                    pygame.draw.lines(game_screen, BLACK, True, ((c * SQUARESIZE + BORDER + WIDTH, r * SQUARESIZE + BORDER + WIDTH), ((c * SQUARESIZE + BORDER + WIDTH -2 * WIDTH + SQUARESIZE, r * SQUARESIZE + BORDER + WIDTH -2 * WIDTH + SQUARESIZE))), WIDTH * 4)
+                    pygame.draw.lines(game_screen, BLACK, True, ((c * SQUARESIZE + BORDER + WIDTH, r * SQUARESIZE + BORDER + WIDTH -2 * WIDTH + SQUARESIZE), ((c * SQUARESIZE + BORDER + WIDTH -2 * WIDTH + SQUARESIZE, r * SQUARESIZE + BORDER + WIDTH))), WIDTH * 4)
+
+                else:
+                    pygame.draw.rect(game_screen, RED, (c * SQUARESIZE + BORDER + WIDTH, r * SQUARESIZE + BORDER + WIDTH, -2 * WIDTH + SQUARESIZE, -2 * WIDTH + SQUARESIZE))
     
     pygame.display.update()
 
@@ -353,7 +359,6 @@ while play_again:
                 posy = event.pos[1]
                 selectedx, selectedy = get_cell(posx, posy)
                 if selectedx != -1:
-                    # if display_field[selectedx][selectedy] != "" or field[selectedx][selectedy] == "0":
                     if event.button == 1:
                         if not check_hit_mine(selectedx, selectedy):
                             if check_win():
